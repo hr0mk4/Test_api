@@ -1,0 +1,30 @@
+run:
+  tests: true
+  timeout: 2m
+  issues-exit-code: 1
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - gofmt
+    - misspell
+    - gocritic
+    - gocyclo
+  disable:
+    - lll
+
+linters-settings:
+  gocyclo:
+    min-complexity: 15
+  errcheck:
+    check-type-assertions: true
+
+issues:
+  exclude:
+    - "error return value not checked"
+  max-issues-per-linter: 0
+  max-same-issues: 0
