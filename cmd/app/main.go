@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -13,19 +14,34 @@ import (
 	"github.com/hr0mk4/test_api/internal/database"
 	"github.com/hr0mk4/test_api/internal/handlers"
 	"github.com/hr0mk4/test_api/internal/middleware"
+	"github.com/hr0mk4/test_api/internal/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
-	err := database.Connect()
-	if err != nil {
-		log.Fatal(err)
+	dsn := "host=db user=postgres password=secret dbname=merch_store port=5432 sslmode=disable TimeZone=UTC"
+	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if DB == nil {
+		log.Fatalf("no db connection")
 	}
-	db := database.GetDB()
+	if err != nil {
+		log.Printf("Failed to connect to database: %v", err)
+		return
+	}
+
+	if err := DB.AutoMigrate(&models.User{}, &models.Purchase{}, &models.Transaction{}); err != nil {
+		log.Printf("Failed to migrate: %v", err)
+		return
+	}
+
+	fmt.Println("Database connected")
+	database.SetDB(DB)
 
 	r := gin.Default()
 	r.POST("/api/auth", handlers.AuthHandler)
 	authorized := r.Group("/api")
-	authorized.Use(middleware.AuthMiddleware(db))
+	authorized.Use(middleware.AuthMiddleware(DB))
 	{
 		authorized.GET("/info", handlers.InfoHandler)
 		authorized.GET("/buy/:item", handlers.PurchaseHandler)
