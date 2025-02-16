@@ -17,7 +17,6 @@ import (
 func TestInfoHandlerAuthorized(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	router := gin.Default()
-
 	router.GET("/api/info", func(c *gin.Context) {
 		user := models.User{
 			Username: "testuser",
